@@ -1,0 +1,6 @@
+.ash_history
+.cache
+.coverage
+.ipython
+__pycache__
+db.sqlite3
