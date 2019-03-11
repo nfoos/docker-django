@@ -1,8 +1,12 @@
-FROM  python:3.7.2-alpine3.9 AS web_base
-
 ARG UID=1000
 ARG GID=1000
 ARG USER=app
+
+FROM  python:3.7.2-alpine3.9 AS web_base
+
+ARG UID
+ARG GID
+ARG USER
 
 RUN addgroup -g $GID $USER && \
     adduser -u $UID -h /opt/$USER -G $USER -D $USER
@@ -24,6 +28,8 @@ USER $USER
 ENV PYTHONUNBUFFERED 1
 
 FROM web_base AS web_test
+
+ARG USER
 
 USER root
 COPY requirements-test.txt ./
