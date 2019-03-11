@@ -1,12 +1,13 @@
 Docker Django
 =============
 
-Build the docker image(s)
-```
-docker-compose build
-```
+This repo serves as a skeleton for starting new Django projects running in Docker. The main image is based from an official Python 3 Alpine Linux image. The Docker Compose config also provides services for a PostgreSQL server and a container for running tests.
 
-Edit docker-compose.yml, set the database credentials accordingly
+Quickstart Guide
+----------------
+
+### Edit docker-compose.yml
+Set the database credentials accordingly, the database and user will be created when the db container initializes.
 ```
 services:
   db:
@@ -17,17 +18,24 @@ services:
       - POSTGRES_PASSWORD=mysite_pass
 ```
 
-Start the database container
+### Start the db service
 ```
 docker-compose up -d db
 ```
 
-Create a Django project, substitute *mysite* for a better name from here on
+### Build the docker image
+```
+docker-compose build web
+```
+
+### Create a Django project
+Substitute *mysite* for a better name from here on
 ```
 docker-compose run --rm web django-admin startproject mysite .
 ```
 
-Edit mysite/settings.py, make sure database credentials match *docker-compose.yml*
+### Edit mysite/settings.py
+Make sure database credentials match *docker-compose.yml*
 ```
 ALLOWED_HOSTS = ['*']
 ...
@@ -44,32 +52,23 @@ DATABASES = {
 TIME_ZONE = 'America/Indianapolis'
 ```
 
-Start the Django app
+### Start the web service
 ```
 docker-compose up -d web
 ```
 
-Apply database migrations
+### Apply database migrations
 ```
 docker-compose exec web python manage.py migrate
 ```
 
-Verify things are working by visiting the site at [http://localhost:8000/](http://localhost:8000/)
-
-Create a superuser
-```
-docker-compose exec web python manage.py createsuperuser
-```
-
-Access admin app at [http://localhost:8000/admin/](http://localhost:8000/admin/), login as the superuser
-
-
-Create a Django app, substitute *myapp* for a better name from here on
+### Create a Django app
+Substitute *myapp* for a better name from here on
 ```
 docker-compose exec web python manage.py startapp myapp
 ```
 
-Register the app in *mysite/settings.py*
+### Register the app in *mysite/settings.py*
 ```
 INSTALLED_APPS = [
     ...
@@ -78,34 +77,51 @@ INSTALLED_APPS = [
 
 ```
 
-Check project for potential problems
+### Create a superuser
+```
+docker-compose exec web python manage.py createsuperuser
+```
+
+### Verify things are working
+Visit the site at [http://localhost:8000/](http://localhost:8000/)
+Access admin app at [http://localhost:8000/admin/](http://localhost:8000/admin/)
+
+Useful Commands
+---------------
+
+### Check project for potential problems
 ```
 docker-compose exec web python manage.py check
 ```
 
-Run an interactive shell
+### Run an interactive shell
 ```
 docker-compose exec web python manage.py shell
 ```
 
-Create database migrations
+### Create database migrations
 ```
 docker-compose exec web python manage.py makemigrations
 ```
 
-Run Django tests
+### Run Django tests
 ```
 docker-compose exec web python manage.py test
 ```
 
-Run tests using pytest
-```
-docker-compose run --rm test pytest
-```
+Using pytest
+------------
+Note that the [pytest discovery](https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery) differs from [Django/unittest discovery](https://docs.python.org/3/library/unittest.html#test-discovery).
 
-Edit pytest.ini, set DJANGO_SETTINGS_MODULE and cov modules accordingly
+### Edit pytest.ini
+Set DJANGO_SETTINGS_MODULE and cov modules accordingly
 ```
 [pytest]
 DJANGO_SETTINGS_MODULE=mysite.settings
 addopts = -vv  --color=auto --cov=myapp --cov=mysite --cov-report=term-missing:skip-covered
+```
+
+### Run tests
+```
+docker-compose run --rm test pytest
 ```
